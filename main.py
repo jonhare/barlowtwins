@@ -44,6 +44,8 @@ parser.add_argument('--print-freq', default=100, type=int, metavar='N',
                     help='print frequency')
 parser.add_argument('--checkpoint-dir', default='./checkpoint/', type=Path,
                     metavar='DIR', help='path to checkpoint directory')
+parser.add_argument('--model', default='resnet50', choices=['resnet50', 'vgg16'],
+                    help='Type of model')
 
 
 def main():
@@ -149,7 +151,7 @@ def main_worker(gpu, args):
     if args.rank == 0:
         # save final model
         torch.save(model.module.backbone.state_dict(),
-                   args.checkpoint_dir / 'resnet50.pth')
+                   args.checkpoint_dir / '${args.model}.pth')
 
 
 def adjust_learning_rate(args, optimizer, loader, step):
@@ -188,11 +190,20 @@ class BarlowTwins(nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.backbone = torchvision.models.resnet50(zero_init_residual=True)
-        self.backbone.fc = nn.Identity()
+
+        if args.model == 'resnet50':
+            self.backbone = torchvision.models.resnet50(zero_init_residual=True)
+            self.backbone.fc = nn.Identity()
+            feature_size = 2048
+        elif args.model == 'vgg16':
+            self.backbone = torchvision.models.vgg16()
+            self.backbone.classifier = nn.Identity()
+            feature_size = 7*7*512
+        else:
+            assert False "unsupported model"
 
         # projector
-        sizes = [2048] + list(map(int, args.projector.split('-')))
+        sizes = [feature_size] + list(map(int, args.projector.split('-')))
         layers = []
         for i in range(len(sizes) - 2):
             layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=False))
