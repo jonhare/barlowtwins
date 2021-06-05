@@ -200,7 +200,7 @@ class BarlowTwins(nn.Module):
             self.backbone.classifier = nn.Identity()
             feature_size = 7*7*512
         else:
-            assert False "unsupported model"
+            assert False, "unsupported model"
 
         # projector
         sizes = [feature_size] + list(map(int, args.projector.split('-')))
