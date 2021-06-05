@@ -23,7 +23,7 @@ import torchvision.transforms as transforms
 
 parser = argparse.ArgumentParser(description='Barlow Twins Training')
 parser.add_argument('data', type=Path, metavar='DIR',
-                    help='path to dataset')
+                    help='path to dataset', default='/ECSssd/data_sets/imagenet_2012/train/')
 parser.add_argument('--workers', default=8, type=int, metavar='N',
                     help='number of data loader workers')
 parser.add_argument('--epochs', default=1000, type=int, metavar='N',
@@ -44,7 +44,7 @@ parser.add_argument('--print-freq', default=100, type=int, metavar='N',
                     help='print frequency')
 parser.add_argument('--checkpoint-dir', default='./checkpoint/', type=Path,
                     metavar='DIR', help='path to checkpoint directory')
-parser.add_argument('--model', default='resnet50', choices=['resnet50', 'vgg16'],
+parser.add_argument('--model', required=True, choices=['resnet50', 'vgg16'],
                     help='Type of model')
 
 
